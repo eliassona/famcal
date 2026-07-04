@@ -584,6 +584,136 @@
     z-index: 99;
   }
 
+  /* ── TODO VIEW ── */
+  .todo-wrap {
+    flex: 1;
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    overflow-y: auto;
+    align-items: flex-start;
+  }
+  .todo-column {
+    flex: 1;
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .todo-column-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .todo-column-title {
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .todo-count {
+    background: var(--bg);
+    border-radius: 999px;
+    padding: 1px 8px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-muted);
+  }
+  .todo-list { padding: 8px; display: flex; flex-direction: column; gap: 4px; min-height: 60px; }
+  .todo-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.1s;
+    border: 1px solid transparent;
+  }
+  .todo-item:hover { background: var(--bg); border-color: var(--border); }
+  .todo-item.done .todo-text { text-decoration: line-through; opacity: 0.45; }
+  .todo-check {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 2px;
+    transition: all 0.15s;
+    cursor: pointer;
+    font-size: 0.65rem;
+    color: transparent;
+  }
+  .todo-check:hover { border-color: var(--accent); }
+  .todo-item.done .todo-check { background: var(--accent); border-color: var(--accent); color: white; }
+  .todo-body { flex: 1; min-width: 0; }
+  .todo-text { font-size: 0.875rem; font-weight: 600; word-break: break-word; }
+  .todo-meta { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .todo-priority-dot {
+    width: 6px; height: 6px; border-radius: 50%; margin-top: 6px; flex-shrink: 0;
+  }
+  .priority-high   { background: #E07A5F; }
+  .priority-normal { background: #8A9BAE; }
+  .priority-low    { background: #B5CDA3; }
+
+  .add-todo-btn {
+    width: calc(100% - 16px);
+    margin: 0 8px 8px;
+    padding: 8px;
+    border: 1.5px dashed var(--border);
+    border-radius: 8px;
+    background: none;
+    font-family: inherit;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-weight: 600;
+    text-align: left;
+  }
+  .add-todo-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .todo-empty {
+    text-align: center;
+    padding: 24px 16px;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+  }
+
+  /* header app switcher */
+  .app-tabs {
+    display: flex;
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .app-tab {
+    padding: 5px 14px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border: none;
+    background: none;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .app-tab.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+
+  @media (max-width: 768px) {
+    .todo-wrap { flex-direction: column; padding: 12px; gap: 12px; }
+    .app-tab { padding: 5px 10px; font-size: 0.74rem; }
+  }
+
   /* ── RESPONSIVE ── */
   @media (max-width: 768px) {
     .sidebar {
@@ -619,9 +749,14 @@
   <div class="logo">
     🏠 <span>Family</span>Cal
   </div>
+  <div class="app-tabs">
+    <button class="app-tab active" data-app="calendar">📅 Calendar</button>
+    <button class="app-tab" data-app="todo">✅ To-Do</button>
+  </div>
   <div class="header-actions">
     <button class="btn btn-icon" id="sidebarToggle" title="Menu" style="display:none">☰</button>
     <button class="btn btn-primary" id="addEventBtn">+ Add Event</button>
+    <button class="btn btn-primary" id="addTodoBtn" style="display:none">+ Add Task</button>
   </div>
 </header>
 
@@ -682,6 +817,56 @@
       </div>
     </div>
     <div class="cal-grid-wrap" id="calGridWrap"></div>
+  </div>
+</div>
+
+<!-- TODO Panel (hidden by default) -->
+<div id="todoPanel" style="display:none;flex:1;flex-direction:column;overflow:hidden;">
+  <div class="cal-toolbar">
+    <div class="cal-title">To-Do Lists</div>
+    <div style="font-size:0.82rem;color:var(--text-muted)">Click a task to edit · Check to complete</div>
+  </div>
+  <div class="todo-wrap" id="todoWrap"></div>
+</div>
+
+<!-- Add/Edit Todo Modal -->
+<div class="modal-overlay" id="todoModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="todoModalTitle">New Task</div>
+      <button class="modal-close" id="closeTodoModal">✕</button>
+    </div>
+    <div class="form-group">
+      <label>Task</label>
+      <input type="text" id="todoText" placeholder="e.g. Buy milk" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Person</label>
+        <select id="todoMember"></select>
+      </div>
+      <div class="form-group">
+        <label>Priority</label>
+        <select id="todoPriority">
+          <option value="high">🔴 High</option>
+          <option value="normal" selected>🔵 Normal</option>
+          <option value="low">🟢 Low</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Due Date (optional)</label>
+      <input type="date" id="todoDue" />
+    </div>
+    <div class="form-group">
+      <label>Notes</label>
+      <textarea id="todoNotes" placeholder="Any details…" style="min-height:50px"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" id="deleteTodoBtn" style="display:none;margin-right:auto">Delete</button>
+      <button class="btn btn-ghost" id="cancelTodoBtn">Cancel</button>
+      <button class="btn btn-primary" id="saveTodoBtn">Save Task</button>
+    </div>
   </div>
 </div>
 
@@ -797,6 +982,9 @@ const API = {
   async createMember(m)       { return _post('/api/members', m); },
   async updateMember(id, m)   { return _put(`/api/members/${id}`, m); },
   async deleteMember(id)      { return _del(`/api/members/${id}`); },
+  async createTodo(t)         { return _post('/api/todos', t); },
+  async updateTodo(id, t)     { return _put(`/api/todos/${id}`, t); },
+  async deleteTodo(id)        { return _del(`/api/todos/${id}`); },
 };
 
 async function _get(url) {
@@ -820,7 +1008,7 @@ async function _del(url) {
 const COLORS = ['#E07A5F','#3D9BE9','#7FB069','#F4A261','#9B72CF','#E8A598','#2C9EA8','#D4854A','#5C7A4E','#B85C8C'];
 
 // In-memory state — loaded from server once at startup
-let state = { members: [], events: [] };
+let state = { members: [], events: [], todos: [] };
 
 // "visible" is a UI-only concept (not persisted to server)
 let memberVisibility = {};   // { memberId: bool }
@@ -1411,6 +1599,201 @@ function fetchWeather() {
   }, () => { document.getElementById('weatherSection').style.display = 'none'; });
 }
 
+// ── APP SWITCHING ──────────────────────────────────────────────────────────
+let currentApp = 'calendar';
+
+function switchApp(app) {
+  currentApp = app;
+  const calBody   = document.querySelector('.app-body');
+  const todoPanel = document.getElementById('todoPanel');
+  const addEventBtn = document.getElementById('addEventBtn');
+  const addTodoBtn  = document.getElementById('addTodoBtn');
+
+  document.querySelectorAll('.app-tab').forEach(t => t.classList.toggle('active', t.dataset.app === app));
+
+  if (app === 'calendar') {
+    calBody.style.display   = 'flex';
+    todoPanel.style.display = 'none';
+    addEventBtn.style.display = '';
+    addTodoBtn.style.display  = 'none';
+  } else {
+    calBody.style.display   = 'none';
+    todoPanel.style.display = 'flex';
+    addEventBtn.style.display = 'none';
+    addTodoBtn.style.display  = '';
+    renderTodos();
+  }
+}
+
+document.querySelectorAll('.app-tab').forEach(tab => {
+  tab.addEventListener('click', () => switchApp(tab.dataset.app));
+});
+
+// ── TODO RENDER ────────────────────────────────────────────────────────────
+function renderTodos() {
+  const wrap = document.getElementById('todoWrap');
+  wrap.innerHTML = '';
+
+  // Group: one column per member + one "Everyone" column
+  const columns = [
+    { id: '', label: 'Everyone', icon: '👨‍👩‍👧' },
+    ...state.members.map(m => ({ id: m.id, label: m.name, icon: '', color: m.color })),
+  ];
+
+  columns.forEach(col => {
+    const todos = state.todos.filter(t => t.memberId === col.id);
+    if (todos.length === 0 && col.id !== '') return; // hide empty member columns unless Everyone
+
+    const pending = todos.filter(t => !t.done);
+    const done    = todos.filter(t =>  t.done);
+    const sorted  = [
+      ...pending.sort((a,b) => {
+        const p = {high:0,normal:1,low:2};
+        return (p[a.priority]||1) - (p[b.priority]||1) || (a.text||'').localeCompare(b.text||'');
+      }),
+      ...done,
+    ];
+
+    const col_el = document.createElement('div');
+    col_el.className = 'todo-column';
+
+    const hdr = document.createElement('div');
+    hdr.className = 'todo-column-header';
+    hdr.innerHTML = `
+      <div class="todo-column-title">
+        ${col.color ? `<span style="width:10px;height:10px;border-radius:50%;background:${col.color};display:inline-block"></span>` : col.icon}
+        ${col.label}
+        <span class="todo-count">${pending.length}</span>
+      </div>`;
+    col_el.appendChild(hdr);
+
+    const list = document.createElement('div');
+    list.className = 'todo-list';
+
+    if (!sorted.length) {
+      list.innerHTML = `<div class="todo-empty">No tasks yet</div>`;
+    } else {
+      sorted.forEach(todo => {
+        const item = document.createElement('div');
+        item.className = 'todo-item' + (todo.done ? ' done' : '');
+
+        const priorityColor = { high:'#E07A5F', normal:'#8A9BAE', low:'#B5CDA3' }[todo.priority||'normal'];
+
+        let metaParts = [];
+        if (todo.due) {
+          const d = new Date(todo.due + 'T00:00:00');
+          const isOverdue = !todo.done && d < new Date(new Date().toDateString());
+          metaParts.push(`<span style="${isOverdue ? 'color:#E07A5F;font-weight:700' : ''}">📅 ${d.toLocaleDateString('default',{month:'short',day:'numeric'})}</span>`);
+        }
+        if (todo.notes) metaParts.push(`📝 ${todo.notes.slice(0,40)}${todo.notes.length>40?'…':''}`);
+
+        item.innerHTML = `
+          <div class="todo-check" title="Toggle done">✓</div>
+          <div class="todo-priority-dot" style="background:${priorityColor}"></div>
+          <div class="todo-body">
+            <div class="todo-text">${todo.text}</div>
+            ${metaParts.length ? `<div class="todo-meta">${metaParts.join(' · ')}</div>` : ''}
+          </div>`;
+
+        item.querySelector('.todo-check').addEventListener('click', async e => {
+          e.stopPropagation();
+          try {
+            const updated = await API.updateTodo(todo.id, { ...todo, done: !todo.done });
+            const idx = state.todos.findIndex(t => t.id === todo.id);
+            if (idx >= 0) state.todos[idx] = updated;
+            renderTodos();
+          } catch { showToast('⚠️ Update failed'); }
+        });
+
+        item.addEventListener('click', () => openTodoModal(todo));
+        list.appendChild(item);
+      });
+    }
+
+    col_el.appendChild(list);
+
+    const addBtn = document.createElement('button');
+    addBtn.className = 'add-todo-btn';
+    addBtn.textContent = '+ Add task';
+    addBtn.addEventListener('click', () => openTodoModal(null, col.id));
+    col_el.appendChild(addBtn);
+
+    wrap.appendChild(col_el);
+  });
+}
+
+// ── TODO MODAL ─────────────────────────────────────────────────────────────
+let editingTodoId = null;
+
+function openTodoModal(todo, defaultMemberId) {
+  editingTodoId = todo ? todo.id : null;
+  document.getElementById('todoModalTitle').textContent = todo ? 'Edit Task' : 'New Task';
+  document.getElementById('todoText').value   = todo ? todo.text : '';
+  document.getElementById('todoDue').value    = todo ? (todo.due || '') : '';
+  document.getElementById('todoNotes').value  = todo ? (todo.notes || '') : '';
+  document.getElementById('todoPriority').value = todo ? (todo.priority || 'normal') : 'normal';
+  document.getElementById('deleteTodoBtn').style.display = todo ? 'inline-flex' : 'none';
+
+  // populate member select
+  const sel = document.getElementById('todoMember');
+  sel.innerHTML = '<option value="">— Everyone —</option>';
+  state.members.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m.id; opt.textContent = m.name;
+    sel.appendChild(opt);
+  });
+  sel.value = todo ? todo.memberId : (defaultMemberId || '');
+
+  openModal('todoModal');
+  setTimeout(() => document.getElementById('todoText').focus(), 200);
+}
+
+async function saveTodo() {
+  const text = document.getElementById('todoText').value.trim();
+  if (!text) { shake('todoText'); return; }
+  const payload = {
+    text,
+    memberId: document.getElementById('todoMember').value,
+    priority: document.getElementById('todoPriority').value,
+    due:      document.getElementById('todoDue').value,
+    notes:    document.getElementById('todoNotes').value.trim(),
+    done:     false,
+  };
+  try {
+    if (editingTodoId) {
+      const existing = state.todos.find(t => t.id === editingTodoId);
+      const updated = await API.updateTodo(editingTodoId, { ...payload, done: existing?.done || false });
+      const idx = state.todos.findIndex(t => t.id === editingTodoId);
+      if (idx >= 0) state.todos[idx] = updated;
+      showToast('Task updated!');
+    } else {
+      const created = await API.createTodo(payload);
+      state.todos.push(created);
+      showToast('Task added!');
+    }
+    closeModal('todoModal');
+    renderTodos();
+  } catch { showToast('⚠️ Save failed'); }
+}
+
+document.getElementById('addTodoBtn').addEventListener('click', () => openTodoModal(null));
+document.getElementById('saveTodoBtn').addEventListener('click', saveTodo);
+document.getElementById('cancelTodoBtn').addEventListener('click', () => closeModal('todoModal'));
+document.getElementById('closeTodoModal').addEventListener('click', () => closeModal('todoModal'));
+document.getElementById('deleteTodoBtn').addEventListener('click', async () => {
+  if (!editingTodoId || !confirm('Delete this task?')) return;
+  try {
+    await API.deleteTodo(editingTodoId);
+    state.todos = state.todos.filter(t => t.id !== editingTodoId);
+    closeModal('todoModal');
+    showToast('Task deleted');
+    renderTodos();
+  } catch { showToast('⚠️ Delete failed'); }
+});
+document.getElementById('todoModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('todoModal')) closeModal('todoModal');
+});
+
 // ── INIT ───────────────────────────────────────────────────────────────────
 async function init() {
   initMobileSidebar();
@@ -1418,7 +1801,8 @@ async function init() {
   try {
     const data = await API.getState();
     state.members = data.members || [];
-    state.events = data.events || [];
+    state.events  = data.events  || [];
+    state.todos   = data.todos   || [];
     // Init all members as visible
     state.members.forEach(m => { memberVisibility[m.id] = true; });
     render();

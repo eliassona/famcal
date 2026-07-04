@@ -151,6 +151,44 @@ def delete_member(member_id):
     return jsonify({'ok': True})
 
 
+# --- Todos ---
+
+@app.route('/api/todos', methods=['GET'])
+def get_todos():
+    return jsonify(load_data().get('todos', []))
+
+
+@app.route('/api/todos', methods=['POST'])
+def create_todo():
+    data = load_data()
+    todo = request.get_json()
+    todo['id'] = str(uuid.uuid4())
+    todo.setdefault('done', False)
+    todo.setdefault('memberId', '')
+    todo.setdefault('priority', 'normal')
+    data.setdefault('todos', []).append(todo)
+    save_data(data)
+    return jsonify(todo), 201
+
+
+@app.route('/api/todos/<todo_id>', methods=['PUT'])
+def update_todo(todo_id):
+    data = load_data()
+    todo = request.get_json()
+    todo['id'] = todo_id
+    data['todos'] = [todo if t['id'] == todo_id else t for t in data.get('todos', [])]
+    save_data(data)
+    return jsonify(todo)
+
+
+@app.route('/api/todos/<todo_id>', methods=['DELETE'])
+def delete_todo(todo_id):
+    data = load_data()
+    data['todos'] = [t for t in data.get('todos', []) if t['id'] != todo_id]
+    save_data(data)
+    return jsonify({'ok': True})
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='FamilyCal server')
     parser.add_argument(
