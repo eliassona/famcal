@@ -1198,7 +1198,7 @@ function renderMonthView(wrap) {
   for (let i = 0; i < rows * 7; i++) {
     const dayOffset = i - firstDay + 1;
     const cellDate = new Date(y, m, dayOffset);
-    const dateStr = cellDate.toISOString().split('T')[0];
+    const dateStr = `${cellDate.getFullYear()}-${String(cellDate.getMonth()+1).padStart(2,'0')}-${String(cellDate.getDate()).padStart(2,'0')}`;
     const isToday = cellDate.toDateString() === today.toDateString();
     const isOther = cellDate.getMonth() !== m;
     const cell = document.createElement('div');
@@ -1256,7 +1256,7 @@ function renderWeekView(wrap) {
       const isT = d.toDateString()===today.toDateString();
       const slot = document.createElement('div');
       slot.className = 'time-slot' + (isT ? ' today-col' : '');
-      const dateStr = d.toISOString().split('T')[0];
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
       allEvs.filter(ev => ev.date===dateStr && (ev.time ? parseInt(ev.time)==hour : hour===8))
         .forEach(ev => {
           const chip = document.createElement('div');
@@ -1476,6 +1476,9 @@ function formatTime(t) {
   const ampm = h < 12 ? 'am' : 'pm';
   return `${h%12||12}:${String(m).padStart(2,'0')}${ampm}`;
 }
+function localDateStr(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
 function shake(id) {
   const el = document.getElementById(id);
   el.style.borderColor = '#E07A5F';
@@ -1519,7 +1522,7 @@ document.querySelectorAll('.view-tab').forEach(tab => {
 
 // ── EVENT LISTENERS ────────────────────────────────────────────────────────
 document.getElementById('addEventBtn').addEventListener('click', () => {
-  openEventModalForDate(new Date().toISOString().split('T')[0]);
+  openEventModalForDate(localDateStr(new Date()));
 });
 document.getElementById('saveEventBtn').addEventListener('click', saveEvent);
 document.getElementById('cancelEventBtn').addEventListener('click', () => closeModal('eventModal'));
@@ -1561,7 +1564,7 @@ document.getElementById('deleteMemberBtn').addEventListener('click', deleteMembe
 document.addEventListener('keydown', e => {
   if (e.key==='Escape') ['eventModal','detailModal','memberModal'].forEach(closeModal);
   if (e.key==='n' && !e.target.matches('input,textarea,select'))
-    openEventModalForDate(new Date().toISOString().split('T')[0]);
+    openEventModalForDate(localDateStr(new Date()));
 });
 
 // ── MOBILE SIDEBAR ─────────────────────────────────────────────────────────
