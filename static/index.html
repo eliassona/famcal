@@ -1087,11 +1087,11 @@ function renderMiniCal() {
   document.getElementById('miniTitle').textContent = miniDate.toLocaleString('default', { month: 'long', year: 'numeric' });
   const grid = document.getElementById('miniGrid');
   grid.innerHTML = '';
-  ['Su','Mo','Tu','We','Th','Fr','Sa'].forEach(d => {
+  ['Mo','Tu','We','Th','Fr','Sa','Su'].forEach(d => {
     const el = document.createElement('div');
     el.className = 'mini-dow'; el.textContent = d; grid.appendChild(el);
   });
-  const first = new Date(y, m, 1).getDay();
+  const first = (new Date(y, m, 1).getDay() + 6) % 7; // 0=Mon…6=Sun
   const days = new Date(y, m + 1, 0).getDate();
   const today = new Date();
   for (let i = 0; i < first; i++) { const el = document.createElement('div'); grid.appendChild(el); }
@@ -1185,7 +1185,7 @@ function renderMain() {
 
 function renderMonthView(wrap) {
   const y = viewDate.getFullYear(), m = viewDate.getMonth();
-  const firstDay = new Date(y, m, 1).getDay();
+  const firstDay = (new Date(y, m, 1).getDay() + 6) % 7; // 0=Mon…6=Sun
   const daysInMonth = new Date(y, m + 1, 0).getDate();
   const today = new Date();
   const rangeStart = new Date(y, m, 1 - firstDay);
@@ -1193,7 +1193,7 @@ function renderMonthView(wrap) {
   const allEvs = visibleEvents(getEventsForRange(rangeStart, rangeEnd));
   const grid = document.createElement('div');
   grid.className = 'month-grid';
-  ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(d => {
+  ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(d => {
     const h = document.createElement('div'); h.className = 'dow-header'; h.textContent = d; grid.appendChild(h);
   });
   const rows = Math.ceil((firstDay + daysInMonth) / 7);
@@ -1231,7 +1231,7 @@ function renderMonthView(wrap) {
 }
 
 function getWeekStart(date) {
-  const d = new Date(date); d.setDate(d.getDate() - d.getDay()); d.setHours(0,0,0,0); return d;
+  const d = new Date(date); d.setDate(d.getDate() - (d.getDay() + 6) % 7); d.setHours(0,0,0,0); return d;
 }
 
 function renderWeekView(wrap) {
@@ -1507,7 +1507,9 @@ document.getElementById('nextBtn').addEventListener('click', () => {
   miniDate = new Date(viewDate); render();
 });
 document.getElementById('todayBtn').addEventListener('click', () => {
-  viewDate = new Date(); viewDate.setDate(1); miniDate = new Date(viewDate); render();
+  viewDate = new Date();
+  if (currentView === 'month') viewDate.setDate(1);
+  miniDate = new Date(viewDate); render();
 });
 document.getElementById('miniPrev').addEventListener('click', () => { miniDate.setMonth(miniDate.getMonth()-1); renderMiniCal(); });
 document.getElementById('miniNext').addEventListener('click', () => { miniDate.setMonth(miniDate.getMonth()+1); renderMiniCal(); });
