@@ -8,13 +8,33 @@ Then visit: http://<your-pi-ip>:5000
 import argparse
 import json
 import os
+import shutil
+import threading
 import uuid
 from datetime import datetime
 from flask import Flask, jsonify, request, send_from_directory
 
 app = Flask(__name__, static_folder='static')
 
-DATA_FILE = os.path.join(os.path.dirname(__file__), 'calendar.json')
+DATA_FILE   = os.path.join(os.path.dirname(__file__), 'calendar.json')
+BACKUP_DIR  = os.path.join(os.path.dirname(__file__), 'backups')
+BACKUP_SECS = 7 * 24 * 60 * 60   # one week
+
+
+# ── Backup ────────────────────────────────────────────────────────────────────
+
+def do_backup():
+    """Copy calendar.json → backups/calendar-YYYY-MM-DD.json, then reschedule."""
+    if os.path.exists(DATA_FILE):
+        os.makedirs(BACKUP_DIR, exist_ok=True)
+        stamp = datetime.now().strftime('%Y-%m-%d')
+        dest  = os.path.join(BACKUP_DIR, f'calendar-{stamp}.json')
+        shutil.copy2(DATA_FILE, dest)
+        print(f'  📦 Backup saved: backups/calendar-{stamp}.json')
+    # Reschedule for next week
+    t = threading.Timer(BACKUP_SECS, do_backup)
+    t.daemon = True
+    t.start()
 
 # ── Default data ──────────────────────────────────────────────────────────────
 
@@ -204,4 +224,5 @@ if __name__ == '__main__':
     print(f"  Open http://localhost:{args.port} in your browser")
     print(f"  Or from other devices: http://<pi-ip>:{args.port}")
     print("━" * 50)
+    do_backup()   # run once now, then weekly
     app.run(host='0.0.0.0', port=args.port, debug=False)
