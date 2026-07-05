@@ -916,6 +916,7 @@
         <option value="daily">Daily</option>
         <option value="weekly">Weekly</option>
         <option value="monthly">Monthly</option>
+        <option value="yearly">Yearly</option>
       </select>
     </div>
     <div class="modal-footer">
@@ -1060,6 +1061,7 @@ function getEventsForRange(startDate, endDate) {
         if (ev.recurrence === 'daily') cur.setDate(cur.getDate() + 1);
         else if (ev.recurrence === 'weekly') cur.setDate(cur.getDate() + 7);
         else if (ev.recurrence === 'monthly') cur.setMonth(cur.getMonth() + 1);
+        else if (ev.recurrence === 'yearly') cur.setFullYear(cur.getFullYear() + 1);
         else break;
       }
     }
