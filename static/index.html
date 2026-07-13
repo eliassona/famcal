@@ -1141,9 +1141,12 @@ function renderMembers() {
 function renderUpcoming() {
   const list = document.getElementById('upcomingList');
   list.innerHTML = '';
-  const today = new Date(); today.setHours(0,0,0,0);
+  const today = new Date();
+  const todayStr = localDateStr(today);
   const end = new Date(today); end.setDate(end.getDate() + 30);
-  const evs = visibleEvents(getEventsForRange(today, end));
+  const endStr = localDateStr(end);
+  const evs = visibleEvents(getEventsForRange(today, end))
+    .filter(e => e.date >= todayStr && e.date <= endStr);
   evs.sort((a,b) => (a.date+a.time).localeCompare(b.date+b.time));
   const shown = evs.slice(0, 8);
   if (!shown.length) { list.innerHTML = '<div class="upcoming-empty">No upcoming events</div>'; return; }
